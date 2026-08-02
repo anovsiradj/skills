@@ -11,21 +11,22 @@ tags:
   - file-system
   - scripting
   - dev-tools
-version: 1.1.0
+version: 1.0.0
 authors:
   - anovsiradj
-  - https://www.perplexity.ai/
-  - https://copilot.microsoft.com/
+  - <https://www.perplexity.ai/>
 created: 20260801
 ---
 
 # windows-powershell
 
 ## Purpose
-You are a coding agent running on **Windows 11** with **PowerShell 7+**.
+
+You are a coding agent running on **Windows**. The user uses **PowerShell**, not bash.  
 Always generate **PowerShell-native** commands and scripts for any shell, filesystem, or automation task.
 
 ## Core Rules
+
 1. **Never use bash/unix commands** for filesystem or shell operations:
    - Disallowed examples: `ls`, `rm`, `mkdir`, `touch`, `cat`, `cp`, `mv`, `pwd`, `rmdir`, `grep`, `find`, `curl`, `wget`, `zip`, `unzip`, `tar`, `gzip`.
    - Do not assume `bash`, WSL, or Linux; assume **Windows PowerShell** (or PowerShell 7) unless user clearly specifies otherwise.
@@ -49,7 +50,7 @@ Always generate **PowerShell-native** commands and scripts for any shell, filesy
 
 ---
 
-## Section 1 — CRUD Files/Folders
+## Section 1 — CRUD: Files and Folders
 
 ### 1.1 Create
 
@@ -116,73 +117,6 @@ Copy-Item -Path "C:\temp\file.txt" -Destination "C:\backup\"
 Move-Item -Path "C:\temp\file.txt" -Destination "C:\new\"
 ```
 
-**Partial update of a text file (update lines 4 through 7)**
-
-**Approach A — Read into array, modify slice, write back (simple, safe):**
-
-```powershell
-$path = 'C:\temp\file.txt'
-# Backup first
-Copy-Item -Path $path -Destination "$path.bak" -Force
-
-# Read all lines
-$lines = Get-Content -Path $path -Raw -ErrorAction Stop -Encoding UTF8
-# Split into array of lines
-$array = $lines -split "`r?`n"
-
-# Replace lines 4..7 (1-based line numbers)
-$start = 4 - 1
-$end = 7 - 1
-$newSegment = @(
-    "Line 4 replacement"
-    "Line 5 replacement"
-    "Line 6 replacement"
-    "Line 7 replacement"
-)
-
-# Build new array
-$before = $array[0..($start-1)]
-$after = $array[($end+1)..($array.Length-1)]
-$newArray = @()
-if ($before) { $newArray += $before }
-$newArray += $newSegment
-if ($after) { $newArray += $after }
-
-# Write back atomically
-$newArray -join "`r`n" | Set-Content -Path $path -Encoding UTF8 -Force
-```
-
-**Approach B — Stream processing for large files (memory efficient):**
-
-```powershell
-$path = 'C:\temp\largefile.txt'
-$temp = "$path.tmp"
-$startLine = 4
-$endLine = 7
-$current = 0
-
-Get-Content -Path $path -ReadCount 1 | ForEach-Object {
-    $current++
-    if ($current -lt $startLine -or $current -gt $endLine) {
-        $_ | Out-File -FilePath $temp -Append -Encoding UTF8
-    }
-    elseif ($current -eq $startLine) {
-        # Insert replacement lines once
-        "Line 4 replacement" | Out-File -FilePath $temp -Append -Encoding UTF8
-        "Line 5 replacement" | Out-File -FilePath $temp -Append -Encoding UTF8
-        "Line 6 replacement" | Out-File -FilePath $temp -Append -Encoding UTF8
-        "Line 7 replacement" | Out-File -FilePath $temp -Append -Encoding UTF8
-    }
-}
-
-# Replace original after success
-Move-Item -Path $temp -Destination $path -Force
-```
-
-**Notes**
-- Always create a backup before modifying critical files.
-- Use `-Encoding` explicitly to avoid encoding surprises.
-
 ### 1.4 Delete
 
 Use `Remove-Item`. Be explicit with `-Recurse` and `-Force`.
@@ -198,57 +132,18 @@ Remove-Item -Path "C:\temp\folder"
 Remove-Item -Path "C:\temp\folder" -Recurse -Force
 ```
 
-**Partial delete of a text file (delete lines 4 through 7)**
-
-**Approach A — Array method (small files):**
-
-```powershell
-$path = 'C:\temp\file.txt'
-Copy-Item -Path $path -Destination "$path.bak" -Force
-$array = Get-Content -Path $path -ErrorAction Stop
-$start = 4 - 1
-$end = 7 - 1
-
-$before = if ($start -gt 0) { $array[0..($start-1)] } else { @() }
-$after = if ($end -lt ($array.Length - 1)) { $array[($end+1)..($array.Length-1)] } else { @() }
-
-($before + $after) | Set-Content -Path $path -Encoding UTF8 -Force
-```
-
-**Approach B — Stream method for large files:**
-
-```powershell
-$path = 'C:\temp\largefile.txt'
-$temp = "$path.tmp"
-$startLine = 4
-$endLine = 7
-$current = 0
-
-Get-Content -Path $path -ReadCount 1 | ForEach-Object {
-    $current++
-    if ($current -lt $startLine -or $current -gt $endLine) {
-        $_ | Out-File -FilePath $temp -Append -Encoding UTF8
-    }
-}
-
-Move-Item -Path $temp -Destination $path -Force
-```
-
-**Notes**
-- For both update and delete, prefer stream approach for very large files to avoid high memory usage.
-- Use `-ErrorAction Stop` and `try/catch` around operations that must not fail silently.
-
 ---
 
 ## Section 2 — Search & Filter Files/Folders
 
 ### 2.1 Basic Search with Get-ChildItem
+
 ```powershell
 # Search by extension
 Get-ChildItem -Path "C:\temp" -Filter "*.txt"
 
-# Search by name pattern recursively with Depth control (PS7)
-Get-ChildItem -Path "C:\temp" -Include "*report*" -Recurse -Depth 3
+# Search by name pattern
+Get-ChildItem -Path "C:\temp" -Include "*report*" -Recurse
 
 # Exclude specific patterns
 Get-ChildItem -Path "C:\temp" -Exclude "*.log"
@@ -261,6 +156,7 @@ Get-ChildItem -Path "C:\temp" -Directory
 ```
 
 ### 2.2 Advanced Filtering with Where-Object
+
 ```powershell
 # Files larger than 1 MB
 Get-ChildItem -Path "C:\temp" -File |
@@ -278,19 +174,15 @@ Get-ChildItem -Path "C:\temp" -Recurse -Include *.exe |
         ($_.Length -le 10MB)
     }
 
-# Exclude parent folders by path
-Get-ChildItem -Path "C:\" -Recurse -File -Include *.txt, *.csv -ErrorAction SilentlyContinue |
-    Where-Object { $_.FullName -notmatch '\\Program Files\\' -and $_.FullName -notmatch '\\Windows\\' }
+# Exclude specific parent folders
+Get-ChildItem -Path "C:\" -Recurse -File -Include *.txt, *.csv |
+    Where-Object { $_.PSParentPath -notlike "*Program Files*" -and $_.PSParentPath -notlike "*Windows*" }
 
 # Top 10 largest files
 Get-ChildItem -Path "C:\" -File -Recurse -ErrorAction SilentlyContinue |
     Sort-Object Length -Descending |
     Select-Object -First 10 Name, Length, FullName
 ```
-
-**Notes**
-- Use `-Depth` in PS7 to limit recursion and improve performance.
-- Prefer `Where-Object` property checks over text parsing.
 
 ---
 
@@ -340,7 +232,7 @@ Select-String -Path "C:\logs\*.log" -Pattern "\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}
 
 ---
 
-## Section 4 — Pipelines & Redirection (basic)
+## Section 4 — Pipelines & Redirection in PowerShell
 
 ### 4.1 Pipelines (Objects, not text)
 
@@ -407,29 +299,89 @@ Get-Process |
 
 ---
 
-## Section 5 — Remote File Operations (basic, curl/wget-equivalent)
+## Section 5 — Remote File Operations (curl/wget-equivalent)
 
-Use `Invoke-WebRequest` and `Invoke-RestMethod` for downloads and APIs. (Advanced retry and parallel patterns are in SKILL-advanced.md.)
+Use `Invoke-WebRequest` and `Invoke-RestMethod`.
+
+### 5.1 Downloads
 
 ```powershell
-# Simple download
+# Simple download (wget/curl equivalent)
 Invoke-WebRequest -Uri "https://example.com/file.zip" -OutFile "C:\Downloads\file.zip"
 
-# Download with headers
+# Download with progress
+$ProgressPreference = 'Continue'
+Invoke-WebRequest -Uri "https://example.com/large.zip" -OutFile "C:\Downloads\large.zip"
+
+# Download with headers (e.g., auth)
 $headers = @{ Authorization = "Bearer token" }
 Invoke-WebRequest -Uri "https://api.example.com/data" -Headers $headers -OutFile "C:\data.json"
 
-# GET JSON via REST
+# Download multiple files
+$urls = @(
+    "https://example.com/file1.zip",
+    "https://example.com/file2.zip"
+)
+foreach ($url in $urls) {
+    $filename = Split-Path $url -Leaf
+    Invoke-WebRequest -Uri $url -OutFile "C:\Downloads\$filename"
+}
+```
+
+### 5.2 REST APIs
+
+```powershell
+# GET JSON
 $data = Invoke-RestMethod -Uri "https://api.example.com/data"
 
 # POST JSON
 $body = @{ name = "John"; email = "john@example.com" } | ConvertTo-Json
 Invoke-RestMethod -Uri "https://api.example.com/users" -Method Post -Body $body -ContentType "application/json"
+
+# Authenticated GET
+$headers = @{ Authorization = "Bearer token" }
+Invoke-RestMethod -Uri "https://api.example.com/users/me" -Headers $headers
+```
+
+### 5.3 Download with Retry
+
+```powershell
+function Download-WithRetry {
+    param(
+        [string]$Uri,
+        [string]$OutFile,
+        [int]$MaxRetries = 3,
+        [int]$RetrySeconds = 5
+    )
+
+    $attempt = 1
+    while ($attempt -le $MaxRetries) {
+        try {
+            Write-Host "Attempt $attempt of $MaxRetries..."
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile -ErrorAction Stop
+            Write-Host "✓ Download successful"
+            return
+        }
+        catch {
+            Write-Warning "✗ Download failed: $($_.Exception.Message)"
+            if ($attempt -lt $MaxRetries) {
+                Write-Host "Retrying in $RetrySeconds seconds..."
+                Start-Sleep -Seconds $RetrySeconds
+            }
+            $attempt++
+        }
+    }
+    Write-Error "Download failed after $MaxRetries attempts"
+}
 ```
 
 ---
 
-## Section 6 — Compression
+## Section 6 — Compressed Files (ZIP)
+
+Use `Compress-Archive` and `Expand-Archive`. [29][30][33][42]
+
+### 6.1 Create and Extract ZIP
 
 ```powershell
 # Create ZIP from folder
@@ -450,7 +402,9 @@ Expand-Archive -Path "C:\archive.zip" -DestinationPath "C:\Extracted" -Force
 
 ---
 
-## Section 7 — Error Handling (basic)
+## Section 7 — Error Handling Patterns
+
+Use `try/catch/finally` with `-ErrorAction Stop`. [20][23][26][27]
 
 ```powershell
 try {
@@ -470,9 +424,12 @@ finally {
 }
 ```
 
-**Notes**
-- Use `-ErrorAction Stop` to make non-terminating errors catchable.
-- Advanced logging and transcripts are in SKILL-advanced.md.
+ErrorAction quick reference:
+
+- `Stop` — throw terminating error (catchable)
+- `Continue` — show error, continue (default)
+- `SilentlyContinue` — suppress error
+- `Ignore` — suppress error completely
 
 ---
 
@@ -501,9 +458,11 @@ echo >> f  → Add-Content -Path f -Value "text"
 2>&1       → 2>&1 (same syntax)
 ```
 
+Always prefer the full PowerShell cmdlet names in scripts; aliases are acceptable in interactive sessions.
+
 ---
 
-## Section 9 — Quick Agent Checklist
+## Quick Agent Checklist
 
 Before sending shell/code suggestions on Windows:
 
