@@ -1,0 +1,7 @@
+
+/.agents/sessions.txt
+/.agents/skills/windows-powershell
+
+/tmp/
+/__pycache__/
+

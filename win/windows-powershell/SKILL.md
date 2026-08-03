@@ -5,18 +5,14 @@ description: >
   (not bash) and provides patterns for CRUD on files/folders, search and filter,
   text search, pipelines and redirection, remote downloads, compression, and
   error handling.
-tags:
-  - windows
-  - powershell
-  - file-system
-  - scripting
-  - dev-tools
-version: 1.1.0
-authors:
-  - anovsiradj
-  - https://www.perplexity.ai/
-  - https://copilot.microsoft.com/
-created: 20260801
+license: Unlicense
+metadata:
+  version: 2026.08.03+15
+  authors:
+    - anovsiradj
+    - https://www.perplexity.ai/
+    - https://copilot.microsoft.com/
+    - https://antigravity.google/
 ---
 
 # windows-powershell
@@ -73,27 +69,7 @@ New-Item -Path "C:\temp\file.txt" -ItemType File -Value "Hello World"
 
 ### 1.2 Read
 
-Use `Get-ChildItem` for listing and `Get-Content` for file contents.
-
-```powershell
-# List files and folders in a directory
-Get-ChildItem -Path "C:\temp"
-
-# List with filter (by extension)
-Get-ChildItem -Path "C:\temp" -Filter "*.txt"
-
-# List recursively
-Get-ChildItem -Path "C:\temp" -Recurse
-
-# Read file content
-Get-Content -Path "C:\temp\file.txt"
-
-# Check if a path exists
-Test-Path -Path "C:\temp\file.txt"
-
-# Get current directory (like pwd)
-Get-Location
-```
+See `./read.md` for detailed file-reading patterns (Get-Content, head/tail, follow, encoding, and streaming).
 
 ### 1.3 Update
 
