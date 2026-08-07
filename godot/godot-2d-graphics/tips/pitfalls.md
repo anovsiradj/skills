@@ -16,11 +16,26 @@
 - **Large TileMaps**: Can cause performance issues if not optimized. Use **LOD (Level of Detail)** for distant tiles.
 - **TileSet Size**: Keep TileSets small to avoid memory issues.
 - **TileMap Layers**: Avoid excessive layers; use **TileMapLayer** for better organization.
+- **Annotations**: Use `@export_group` to organize TileMap properties in the editor.
+
+### Example: Using `@export_group` for TileMap
+```gdscript
+@export_group("Tile Properties")
+@export var tile_size: Vector2 = Vector2(32, 32)
+@export_enum("Solid", "Transparent") var tile_type: String = "Solid"
+```
 
 ### Particle Systems
 - **CPU vs GPU**: CPU-based particles are easier to debug but less performant. GPU particles are faster but harder to debug.
 - **Particle Count**: Limit the number of particles to prevent stuttering.
 - **Particle Lifetimes**: Use **short-lived particles** for better performance.
+- **Annotations**: Use `@export_range` to control particle properties like speed and lifetime.
+
+### Example: Using `@export_range` for ParticleSystem
+```gdscript
+@export_range(0, 100) var particle_speed: float = 20.0
+@export_range(0, 10) var particle_lifetime: float = 5.0
+```
 
 ### Sprite Animation
 - **Animation Frames**: Ensure animation frames are optimized for smooth playback.
@@ -38,3 +53,11 @@
 - **Atlas Textures**: Use **TextureAtlas** for sprites to reduce draw calls.
 - **Sprite Packing**: Pack sprites into **TexturePacker** for better performance.
 - **Culling**: Use **VisibilityNotifier2D** to cull off-screen objects.
+- **Annotations**: Use `@export` for exposing performance-related settings in the editor.
+
+### Example: Using `@export` for Performance Settings
+```gdscript
+@export var atlas_texture: Texture2D
+@export var culling_enabled: bool = true
+@export_range(0, 100) var draw_call_limit: int = 50
+```
