@@ -3,5 +3,7 @@
 /.agents/skills/windows-powershell
 
 /tmp/
+/venv/
 /__pycache__/
 
+/*.sublime-workspace

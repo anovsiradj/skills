@@ -1,0 +1,36 @@
+{
+	"others": [
+		{
+			"name": "skills-antfu",
+			"link": "git@github.com:antfu/skills.git",
+			"type": "git",
+			"branch": "main",
+			"result": "folder",
+			"skills": [
+				{
+					"input": "skills/pnpm",
+					"output": "cli/pnpm"
+				}
+			],
+			"commit": "a74f281a27dadc02397bc1a174b0f2c97531b6ae"
+		}
+	],
+	"sources": [
+		{
+			"link": "git@github.com:pnpm/pnpm.io.git",
+			"type": "git",
+			"branch": "main",
+			"name": "pnpm.io.git",
+			"result": "folder",
+			"commit": "d2f2a14df3e1010e4286dc73655a2cef1eeb9a2f"
+		},
+		{
+			"type": "git",
+			"result": "folder",
+			"link": "git@github.com:godotengine/godot-docs.git",
+			"branch": "master",
+			"name": "godot-docs.git",
+			"commit": "2fc15a528f7a4199a9315a3ad16fd37f3769e088"
+		}
+	]
+}

@@ -32,5 +32,6 @@ metadata:
   version: ...
   authors:
     - anovsiradj
+    - {YOUR_AGENT_MODEL_NAME}
 ---
 ```
