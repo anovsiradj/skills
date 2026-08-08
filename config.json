@@ -1,5 +1,5 @@
 {
-	"others": [
+	"agents": [
 		{
 			"name": "skills-antfu",
 			"link": "git@github.com:antfu/skills.git",
@@ -22,7 +22,7 @@
 			"branch": "main",
 			"name": "pnpm.io.git",
 			"result": "folder",
-			"commit": "d2f2a14df3e1010e4286dc73655a2cef1eeb9a2f"
+			"commit": "ffac08eb4e55146fdbba2580c6d713382dca507d"
 		},
 		{
 			"type": "git",
@@ -30,7 +30,7 @@
 			"link": "git@github.com:godotengine/godot-docs.git",
 			"branch": "master",
 			"name": "godot-docs.git",
-			"commit": "2fc15a528f7a4199a9315a3ad16fd37f3769e088"
+			"commit": "8be07b62c7abc0612dad5e75ffd1190243f85392"
 		}
 	]
 }
