@@ -1,67 +1,43 @@
 # 2D Movement Workflow
-Standard way to move 2D objects with support for `@export` and `@export_range`.
+Standard way to move 2D objects, frame-rate independent and with editor-friendly exports.
 
 ### Basic Logic
-1. Get input direction.
-2. Normalize the vector to prevent fast diagonal movement.
-3. Use `@export_range` to control speed for better editor usability.
-4. Update position.
+1. Get input direction with `Input.get_axis()`.
+2. Normalize the vector to prevent faster diagonal movement.
+3. Multiply by speed and `delta`.
+4. Update position (or use `move_and_slide()` on a `CharacterBody2D`).
 
-### Example: Frame-Independent Movement with `@export_range`
+### Example: Frame-Independent Movement
 ```gdscript
-@export var speed: float = 300.0
-@export_range(0.0, 10.0) var max_speed: float = 3.0
+extends Node2D
 
-func _process(delta):
-    var input_dir = Vector2.ZERO
-    input_dir.x = Input.get_axis("move_left", "move_right")
-    input_dir.y = Input.get_axis("move_up", "move_down")
-    
-    if input_dir != Vector2.ZERO:
-        input_dir = input_dir.normalized()
-    
-    velocity = input_dir * speed * max_speed
-    move_and_slide()
+@export var speed: float = 300.0
+
+func _process(delta: float) -> void:
+	var input_dir := Vector2(
+		Input.get_axis("ui_left", "ui_right"),
+		Input.get_axis("ui_up", "ui_down")
+	).normalized()
+
+	position += input_dir * speed * delta
 ```
 
-### Basic Logic
-1. Get input direction.
-2. Normalize the vector (to prevent fast diagonal movement).
-3. Multiply by speed and delta.
-4. Update position.
-
-### Example: Frame-Independent Movement with `@export_range`
+### Example: Grouped Movement Settings
 ```gdscript
-@export var speed: float = 300.0
-@export_range(0.0, 10.0) var max_speed: float = 3.0
+extends CharacterBody2D
 
-func _process(delta):
-    var input_dir = Vector2.ZERO
-    input_dir.x = Input.get_axis("move_left", "move_right")
-    input_dir.y = Input.get_axis("move_up", "move_down")
-    
-    if input_dir != Vector2.ZERO:
-        input_dir = input_dir.normalized()
-    
-    velocity = input_dir * speed * max_speed
-    move_and_slide()
-```
-
-### Example: Using `@export_group` for Movement Settings
-```gdscript
-@export_group("Movement Settings")
+@export_group("Movement")
 @export var speed: float = 300.0
-@export_range(0.0, 10.0) var max_speed: float = 3.0
 @export var acceleration: float = 10.0
+@export var friction: float = 10.0
 
-func _physics_process(delta):
-    var input_dir = Vector2.ZERO
-    input_dir.x = Input.get_axis("move_left", "move_right")
-    input_dir.y = Input.get_axis("move_up", "move_down")
-    
-    if input_dir != Vector2.ZERO:
-        velocity = input_dir * speed * max_speed
-        velocity = velocity.lerp(velocity, Vector2.ZERO, acceleration * delta)
-    
-    move_and_slide()
+func _physics_process(delta: float) -> void:
+	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+
+	if input_dir != Vector2.ZERO:
+		velocity = velocity.move_toward(input_dir * speed, acceleration * speed * delta)
+	else:
+		velocity = velocity.move_toward(Vector2.ZERO, friction * speed * delta)
+
+	move_and_slide()
 ```

@@ -4,8 +4,8 @@
 			"path": ".",
 			"folder_exclude_patterns": [
 				".agents/skills",
-				"skills/tmp",
-				"skills/godot"
+				// "skills/tmp",
+				// "skills/godot"
 			]
 		}
 	]

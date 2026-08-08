@@ -9,7 +9,7 @@ Telling other computers to run a function.
 
 ### Calling an RPC
 Use `.rpc()` to send the call.
-`update_score.rpc(10)` $\rightarrow$ runs `update_score(10)` on all connected peers.
+`update_score.rpc(10)` runs `update_score(10)` on all connected peers.
 
 ### Example: Syncing a Score
 ```gdscript

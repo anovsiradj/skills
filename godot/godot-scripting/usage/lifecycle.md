@@ -5,37 +5,40 @@ Understanding when your code actually runs.
 - `_init()`: Called when the object is first created in memory. Use for initial setup that doesn't require nodes.
 - `_ready()`: Called when the node and its children are fully inside the scene tree. Use for setup that requires nodes.
 - `_process(delta)`: Called every frame. Use for visual updates and frame-dependent logic.
-- `_physics_process(delta)`: Called at a fixed rate. Use for movement and collision handling.
+- `_physics_process(delta)`: Called at a fixed rate (default 60 Hz). Use for movement and collision handling.
+- `_exit_tree()`: Called when the node leaves the scene tree. Use for cleanup.
 
-### Annotations for Lifecycle
-- **`@onready`**: Ensures variables are initialized before they are used, avoiding null reference errors.
-  ```gdscript
-  @onready var my_node = $Path/To/Node
-  func _ready():
-      my_node.visible = true
-  ```
+### `@onready` for Node Access
+`@onready` guarantees the variable is set before `_ready()` runs, avoiding null references.
 
-- **`@onready_var`**: Ensures variables are initialized before they are used, similar to `@onready` but for variables.
-  ```gdscript
-  @onready_var var player: CharacterBody3D
-  func _ready():
-      player.position = Vector3.ZERO
-  ```
+```gdscript
+@onready var sprite: Sprite2D = $Sprite2D
+
+func _ready() -> void:
+	sprite.visible = true
+```
 
 ### Node Access
 Use the `$` shorthand to get a child node.
 `$Sprite2D.play()` is equivalent to `get_node("Sprite2D").play()`.
 
-### Example: Simple Interaction with `@onready`
+### Example: Simple Player with Lifecycle
 ```gdscript
 extends CharacterBody2D
 
-@export var speed = 300.0
+@export var speed := 300.0
 
-@onready var player = $Player
+@onready var sprite: Sprite2D = $Sprite2D
 
-func _physics_process(delta):
-    var direction = Input.get_axis("ui_left", "ui_right")
-    velocity.x = direction * speed
-    move_and_slide()
+func _init() -> void:
+	print("Object created")
+
+func _ready() -> void:
+	print("Entered scene tree")
+	sprite.play("idle")
+
+func _physics_process(delta: float) -> void:
+	var direction := Input.get_axis("ui_left", "ui_right")
+	velocity.x = direction * speed
+	move_and_slide()
 ```

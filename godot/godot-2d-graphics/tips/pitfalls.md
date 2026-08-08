@@ -1,63 +1,29 @@
 # Common 2D Graphics Pitfalls
 
 ### The Diagonal Speed Problem
-**Issue**: If you move 1px right and 1px up, you are actually moving $\sim 1.41\text{px}$ total.
-**Fix**: Always use `.normalized()` on your input vector before multiplying by speed.
+**Issue**: If you move 1px right and 1px up simultaneously, you are actually moving ~1.41px total — diagonals are faster than straight lines.
+**Fix**: Always call `.normalized()` on your input vector before multiplying by speed.
 
 ### Frame Rate Dependency
-**Issue**: `position += velocity` runs every frame. On a 144Hz monitor, the character moves faster than on a 60Hz monitor.
-**Fix**: Always multiply movement by `delta` in `_process` or use `_physics_process`.
+**Issue**: `position += velocity` runs every frame. On a 144Hz monitor the character moves faster than on a 60Hz monitor.
+**Fix**: Multiply movement by `delta` in `_process`, or use `_physics_process`.
 
 ### Texture Filtering
 **Issue**: Pixel art looks blurry when scaled.
-**Fix**: In `Project Settings` -> `Rendering` -> `Textures`, change `Default Texture Filter` to `Nearest`.
+**Fix**: In `Project Settings > Rendering > Textures`, change `Default Texture Filter` to `Nearest`.
 
 ### TileMap Performance
-- **Large TileMaps**: Can cause performance issues if not optimized. Use **LOD (Level of Detail)** for distant tiles.
-- **TileSet Size**: Keep TileSets small to avoid memory issues.
-- **TileMap Layers**: Avoid excessive layers; use **TileMapLayer** for better organization.
-- **Annotations**: Use `@export_group` to organize TileMap properties in the editor.
-
-### Example: Using `@export_group` for TileMap
-```gdscript
-@export_group("Tile Properties")
-@export var tile_size: Vector2 = Vector2(32, 32)
-@export_enum("Solid", "Transparent") var tile_type: String = "Solid"
-```
+- **Large TileMaps**: Use `TileMapLayer` nodes and keep tile sets small.
+- **Layers**: Avoid excessive layers; each layer is a separate draw pass.
+- **Runtime edits**: Avoid modifying large tilemaps every frame.
 
 ### Particle Systems
-- **CPU vs GPU**: CPU-based particles are easier to debug but less performant. GPU particles are faster but harder to debug.
-- **Particle Count**: Limit the number of particles to prevent stuttering.
-- **Particle Lifetimes**: Use **short-lived particles** for better performance.
-- **Annotations**: Use `@export_range` to control particle properties like speed and lifetime.
-
-### Example: Using `@export_range` for ParticleSystem
-```gdscript
-@export_range(0, 100) var particle_speed: float = 20.0
-@export_range(0, 10) var particle_lifetime: float = 5.0
-```
-
-### Sprite Animation
-- **Animation Frames**: Ensure animation frames are optimized for smooth playback.
-- **Animation Trees**: Use **AnimationTree** for complex animations to reduce script overhead.
+- **CPU vs GPU**: CPU particles are easier to debug but less performant; GPU particles are faster but harder to debug.
+- **Count/Lifetime**: Limit particle count and keep lifetimes short to prevent stuttering.
 
 ### Collision Shapes
-- **Complex Shapes**: Avoid overly complex collision shapes for performance reasons.
-- **Collision Layers**: Use **Collision Layers** to optimize collision detection.
-
-### Navigation Meshes
-- **Navigation Regions**: Ensure **Navigation Regions** are correctly set up for 2D navigation.
-- **Navigation Agents**: Use **NavigationAgent2D** for efficient pathfinding.
+- **Complex Shapes**: Overly complex collision shapes are slow. Prefer simple rectangles/circles.
 
 ### Performance Tips
-- **Atlas Textures**: Use **TextureAtlas** for sprites to reduce draw calls.
-- **Sprite Packing**: Pack sprites into **TexturePacker** for better performance.
-- **Culling**: Use **VisibilityNotifier2D** to cull off-screen objects.
-- **Annotations**: Use `@export` for exposing performance-related settings in the editor.
-
-### Example: Using `@export` for Performance Settings
-```gdscript
-@export var atlas_texture: Texture2D
-@export var culling_enabled: bool = true
-@export_range(0, 100) var draw_call_limit: int = 50
-```
+- **Texture Atlases**: Pack sprites into a texture atlas to reduce draw calls.
+- **Culling**: Use `VisibleOnScreenNotifier2D` (Godot 4) to disable off-screen objects.

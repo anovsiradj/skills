@@ -14,6 +14,6 @@ Godot uses a **Right-Handed** system:
 
 ### Example: Creating a Basic Object
 1. Add `Node3D` as scene root.
-2. Add `MeshInstance3D` as child $\rightarrow$ Assign a `BoxMesh`.
-3. Add `Camera3D` $\rightarrow$ Move it back (Z = 5) and point it at the box.
+2. Add `MeshInstance3D` as child, then assign a `BoxMesh`.
+3. Add `Camera3D`, move it back (Z = 5) and point it at the box.
 4. Add `DirectionalLight3D` for lighting.

@@ -5,14 +5,14 @@ Instead of `var health = 100`, use `var health: int = 100`.
 **Why?** It's faster, provides better autocomplete, and catches bugs before you run the game.
 
 ### Use `@onready` Instead of `get_node`
-**Pro Tip**: Use `@onready` to ensure nodes are ready before accessing them. This avoids potential null reference errors and improves performance by avoiding repeated `get_node` calls.
+Cache node references with `@onready` to avoid repeated `get_node()` calls and null errors.
 
-- **Example**:
-  ```gdscript
-  @onready var my_node = $Path/To/Node
-  func _ready():
-      my_node.visible = true
-  ```
+```gdscript
+@onready var my_node: Sprite2D = $Path/To/Node
+
+func _ready() -> void:
+	my_node.visible = true
+```
 
 ### Avoid Hardcoded Paths
 Don't use `get_node("Root/UI/Player/HealthBar")`. If you move the HealthBar, the script breaks.
@@ -23,206 +23,117 @@ Avoid calling `get_node()` or `$` inside `_process`.
 **Bad**:
 ```gdscript
 func _process(delta):
-    $Sprite2D.rotate(delta)
+	$Sprite2D.rotate(delta)
 ```
 **Good**:
 ```gdscript
-@onready var sprite = $Sprite2D
+@onready var sprite: Sprite2D = $Sprite2D
+
 func _process(delta):
-    sprite.rotate(delta)
+	sprite.rotate(delta)
 ```
 
 ### Signals
-**Pro Tip**: Use signals for event-driven programming to decouple components and improve maintainability.
+Use signals for event-driven programming to decouple components.
 
-- **Example**:
-  ```gdscript
-  signal player_died
-  func _ready():
-      $Player.player_died.connect(_on_player_died)
-  
-  func _on_player_died():
-      print("Player died!")
-  ```
+```gdscript
+signal player_died
+
+func _ready() -> void:
+	$Player.died.connect(_on_player_died)
+
+func _on_player_died() -> void:
+	print("Player died!")
+```
 
 ### Inheritance
-**Pro Tip**: Use inheritance to avoid code duplication and promote code reuse.
+Use inheritance to avoid code duplication and promote code reuse.
 
-- **Example**:
-  ```gdscript
-  class Enemy extends CharacterBody3D:
-      var health: int = 100
-      
-      func take_damage(amount: int):
-          health -= amount
-          if health <= 0:
-              queue_free()
-  ```
+```gdscript
+class Enemy extends CharacterBody3D:
+	var health: int = 100
 
-### `@export` and `@export_var`
-**Pro Tip**: Use `@export` and `@export_var` to expose variables and functions to the editor, making them configurable without modifying scripts.
+	func take_damage(amount: int) -> void:
+		health -= amount
+		if health <= 0:
+			queue_free()
+```
 
-- **Example**:
-  ```gdscript
-  @export var jump_force: float = 4.5
-  @export var gravity: float = 9.81
-  ```
+### `@export` Annotations
+Expose variables to the editor so designers can tune them without editing scripts.
+
+```gdscript
+@export var jump_force: float = 4.5
+@export var gravity: float = 9.81
+```
 
 ### `@export_enum`
-**Pro Tip**: Use `@export_enum` to export integer or string properties as enumerated lists.
+Export a property as a dropdown list.
 
-- **Example**:
-  ```gdscript
-  @export_enum("Warrior", "Magician", "Thief") var character_class: int
-  ```
-
-### `@export_flags`
-**Pro Tip**: Use `@export_flags` to export integer properties as bit flags for multiple selections.
-
-- **Example**:
-  ```gdscript
-  @export_flags("Fire", "Water", "Earth", "Wind") var spell_elements: int = 0
-  ```
-
-### `@export_enum`
-**Pro Tip**: Use `@export_enum` to export integer or string properties as enumerated lists.
-
-- **Example**:
-  ```gdscript
-  @export_enum("Warrior", "Magician", "Thief") var character_class: int
-  ```
-
-- **Example**:
-  ```gdscript
-  @export var jump_force: float = 4.5
-  func jump():
-      velocity.y = jump_force
-  ```
-
-### `@tool` Scripts
-**Pro Tip**: Use `@tool` scripts for editor-only functionality, such as custom editors or debug tools.
-
-### `@export_tool_button`
-**Pro Tip**: Use `@export_tool_button` to create clickable buttons in the editor for calling functions.
-
-- **Example**:
-  ```gdscript
-  @tool
-  extends Sprite2D
-
-  @export_tool_button("Randomize Color!")
-  var randomize_color_action = randomize_color
-
-  func randomize_color():
-      self.modulate = Color(randf(), randf(), randf())
-  ```
-
-### `@rpc`
-**Pro Tip**: Use `@rpc` for remote procedure calls in multiplayer scenarios.
-
-- **Example**:
-  ```gdscript
-  @rpc("any_peer", "unreliable_ordered")
-  func update_position(new_position: Vector3):
-      position = new_position
-  ```
-
-### `@export_tool_button`
-**Pro Tip**: Use `@export_tool_button` to create clickable buttons in the editor for calling functions.
-
-- **Example**:
-  ```gdscript
-  @tool
-  extends Sprite2D
-
-  @export_tool_button("Randomize Color!")
-  var randomize_color_action = randomize_color
-
-  func randomize_color():
-      self.modulate = Color(randf(), randf(), randf())
-  ```
-
-- **Example**:
-  ```gdscript
-  @tool
-  class SceneOptimizer:
-      static func optimize_scene(scene: Node):
-          # Custom editor logic
-  ```
-
-### `@export_range`
-**Pro Tip**: Use `@export_range` to restrict variable values within a specified range, improving editor usability.
-
-- **Example**:
-  ```gdscript
-  @export_range(0.0, 10.0) var speed: float = 5.0
-  ```
+```gdscript
+@export_enum("Warrior", "Magician", "Thief") var character_class: String = "Warrior"
+```
 
 ### `@export_flags`
-**Pro Tip**: Use `@export_flags` to export integer properties as bit flags for multiple selections.
+Export an integer as bit flags for multiple selections.
 
-- **Example**:
-  ```gdscript
-  @export_flags("Fire", "Water", "Earth", "Wind") var spell_elements: int = 0
-  ```
-
-### `@export_flags_3d_render` and `@export_flags_2d_navigation`
-**Pro Tip**: Use these annotations to export 3D render layers and 2D navigation layers as bit flags.
-
-- **Example**:
-  ```gdscript
-  @export_flags_3d_render var render_layers: int = 1
-  @export_flags_2d_navigation var navigation_layers: int = 1
-  ```
-
-### `@onready_var`
-**Pro Tip**: Use `@onready_var` to ensure variables are initialized before they are used, similar to `@onready` but for variables.
-
-- **Example**:
-  ```gdscript
-  @onready_var var player: CharacterBody3D
-  func _ready():
-      player.position = Vector3.ZERO
-  ```
+```gdscript
+@export_flags("Fire", "Water", "Earth", "Wind") var spell_elements: int = 0
+```
 
 ### `@export_group` and `@export_subgroup`
-**Pro Tip**: Use these annotations to organize exported properties in the Inspector dock for better usability.
+Organize exported properties in the Inspector dock.
 
-- **Example**:
-  ```gdscript
-  @export_group("Player Stats")
-  @export var health: int = 100
-  @export var speed: float = 5.0
+```gdscript
+@export_group("Player Stats")
+@export var health: int = 100
+@export var speed: float = 5.0
 
-  @export_subgroup("Inventory", "item_")
-  @export var item_coins: int = 0
-  @export var item_health_potions: int = 0
-  ```
+@export_subgroup("Inventory", "item_")
+@export var item_coins: int = 0
+@export var item_health_potions: int = 0
+```
+
+### `@export_range`
+Restrict a value to a range with optional step.
+
+```gdscript
+@export_range(0.0, 10.0, 0.5) var speed: float = 5.0
+```
+
+### `@export_tool_button`
+Create a clickable button in the inspector that calls a method.
+
+```gdscript
+@tool
+extends Sprite2D
+
+@export_tool_button("Randomize Color!")
+var randomize_color_action = randomize_color
+
+func randomize_color() -> void:
+	modulate = Color(randf(), randf(), randf())
+```
+
+### `@tool` Scripts
+Use `@tool` for editor-only functionality (custom editors, debug tools). Guard editor-only code with `Engine.is_editor_hint()`.
+
+### `@rpc`
+Use `@rpc` for remote procedure calls in multiplayer (see godot-networking).
+
+```gdscript
+@rpc("any_peer", "unreliable_ordered")
+func update_position(new_position: Vector3) -> void:
+	position = new_position
+```
 
 ### Avoid Global Variables
-**Pro Tip**: Avoid using global variables to prevent naming conflicts and improve code modularity.
+Use autoload singletons or dependency injection instead of global variables to avoid naming conflicts.
 
 ### Use `queue_free()` Instead of `free()`
-**Pro Tip**: Use `queue_free()` to safely remove nodes from the scene tree, ensuring all pending operations are completed first.
+`queue_free()` safely removes a node at the end of the frame, preventing crashes if other code still references it.
 
-- **Example**:
-  ```gdscript
-  func die():
-      queue_free()
-  ```
-
-### `@export_on_restart`
-**Pro Tip**: Use `@export_on_restart` to reset variables to their default values when the scene restarts.
-
-- **Example**:
-  ```gdscript
-  @export_on_restart var restart_value: int = 0
-  ```
-
-### `@export_exp_easing`
-**Pro Tip**: Use `@export_exp_easing` to export floating-point properties with easing curves for smooth transitions.
-
-- **Example**:
-  ```gdscript
-  @export_exp_easing var transition_speed: float = 1.0
-  ```
+```gdscript
+func die() -> void:
+	queue_free()
+```
